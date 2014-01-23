@@ -13,16 +13,21 @@ CONFIG   -= app_bundle
 TEMPLATE = app
 
 SOURCES += main.cpp \
-    streaming_window.cpp
+    streaming_window.cpp \
+    mainwindow.cpp
 unix {
     CONFIG += link_pkgconfig
     PKGCONFIG += gstreamer-0.10
 }
 
 HEADERS += \
-    streaming_window.h
+    streaming_window.h \
+    mainwindow.h
 
-unix:!macx:!symbian: LIBS += -L$$PWD/GstSupport/build/ -lGstSupport
+unix:!macx:!symbian: LIBS += -L$$PWD/GstSupport/build/ -lGstSupport -lgstinterfaces-0.10
 
 INCLUDEPATH += $$PWD/GstSupport/include
 DEPENDPATH += $$PWD/GstSupport/include
+
+FORMS += \
+    mainwindow.ui
