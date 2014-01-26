@@ -5,6 +5,7 @@
 #-------------------------------------------------
 QT       += core
 QT       += gui
+QT       += widgets
 
 TARGET = untitled
 CONFIG   += console

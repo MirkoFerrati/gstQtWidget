@@ -1,5 +1,5 @@
 #include "streaming_window.h"
-#include <QtGui/QFileDialog>
+#include <QFileDialog>
 #include <gst/gst.h>
 
 extern "C"

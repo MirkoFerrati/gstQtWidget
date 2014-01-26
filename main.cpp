@@ -1,4 +1,4 @@
-#include <QtGui/QApplication>
+#include <QApplication>
 #include <gst/gst.h>
 #include "streaming_window.h"
 #include "mainwindow.h"

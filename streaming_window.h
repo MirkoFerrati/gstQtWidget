@@ -1,10 +1,10 @@
 #ifndef STREAMING_WINDOW_H
 #define STREAMING_WINDOW_H
 
-#include <QtGui/QWidget>
-#include <QtGui/QLabel>
-#include <QtGui/QVBoxLayout>
-#include <QtGui/QHBoxLayout>
+#include <QWidget>
+#include <QLabel>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
 #include "GstSupport/GstSupport.h"
 #include "GstSupport/GstWidget.h"
 #include <boost/scoped_ptr.hpp>
