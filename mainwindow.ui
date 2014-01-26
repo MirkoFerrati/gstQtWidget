@@ -18,15 +18,16 @@
     <item row="0" column="0">
      <layout class="QGridLayout" name="gridLayout">
       <item row="0" column="0">
-       <widget class="QWidget" name="video0" native="true">
-        <zorder>video1</zorder>
-       </widget>
+       <widget class="QWidget" name="video0" native="true"/>
       </item>
       <item row="1" column="0">
        <widget class="QWidget" name="video2" native="true"/>
       </item>
       <item row="0" column="1">
        <widget class="QWidget" name="video1" native="true"/>
+      </item>
+      <item row="1" column="1">
+       <layout class="QHBoxLayout" name="controls_layout"/>
       </item>
      </layout>
     </item>
