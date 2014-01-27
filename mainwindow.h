@@ -22,6 +22,12 @@ public:
 
     WId getWinId(int index=0);
 
+private Q_SLOTS:
+    void on_video_0_enable_clicked();
+    void on_video_1_enable_clicked();
+    void on_video_2_enable_clicked();
+
+
 private:
     Ui::MainWindow *ui;
 
