@@ -8,3 +8,5 @@ gst-launch udpsrc port=1256 ! "application/x-rtp, payload=127" ! rtph264depay ! 
 
 gst-launch v4l2src device=/dev/video0 ! 'video/x-raw-yuv,width=640,height=480' ! x264enc pass=qual quantizer=20 tune=zerolatency ! rtph264pay ! multiudpsink clients="127.0.0.1:1245;127.0.0.1:1256" rtpbin.send_rtcp_src_0
 
+gst-launch v4l2src device=/dev/video2 ! 'video/x-raw-yuv,width=640,height=480' ! tee name=tp tp. ! queue ! x264enc pass=qual quantizer=20 tune=zerolatency ! rtph264pay ! multiudpsink clients="127.0.0.1:1245,192.168.1.166:1256,192.168.1.121:1356" rtpbin.send_rtcp_src_0 tp. ! queue ! theoraenc quality=32 !  oggmux ! filesink location=sample.mp4
+
