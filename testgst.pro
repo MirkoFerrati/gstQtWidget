@@ -7,7 +7,7 @@ QT       += core
 QT       += gui
 QT       += widgets
 
-TARGET = untitled
+TARGET = GstQtWindow
 CONFIG   += console
 CONFIG   -= app_bundle
 
