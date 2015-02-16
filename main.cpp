@@ -58,9 +58,9 @@ int main(int argc, char *argv[])
 //       gst_init (NULL,NULL);
 
       MainWindow window;
-      addVideo(1234,window.getWinId(0));
-      addVideo(1235,window.getWinId(1));
-      addVideo(1236,window.getWinId(2));
+//       addVideo(1234,window.getWinId(0));
+//       addVideo(1235,window.getWinId(1));
+//       addVideo(1236,window.getWinId(2));
        // streaming_window window;
         window.show();
        return a.exec();

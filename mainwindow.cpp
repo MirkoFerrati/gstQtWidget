@@ -1,162 +1,97 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include <string>
 
-MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent),
-    ui(new Ui::MainWindow)
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), save_action(tr("&Save"),parent)
 {
-    ui->setupUi(this);
+    file_menu = menuBar()->addMenu(tr("&File"));
+    file_menu->addAction(&save_action);
 
-    video_0_layout = new QVBoxLayout();
-    video_0_label = new QLabel(QString("Video 0"));
-    video_0_layout->addWidget(video_0_label);
+    connect(&save_action,SIGNAL(triggered()),this,SLOT(on_save_menu_clicked()));
 
-    QVBoxLayout* combo_layout_0 = new QVBoxLayout();
-    QLabel* combo_label_0 = new QLabel("Port:");
-    combo_layout_0->addWidget(combo_label_0);
-    video_0_combobox = new QComboBox();
-    video_0_combobox->addItem(QString("1234"));
-    video_0_combobox->addItem(QString("1235"));
-    video_0_combobox->addItem(QString("1236"));
-    combo_layout_0->addWidget(video_0_combobox);
-    video_0_layout->addLayout(combo_layout_0);
+    QSignalMapper* switch_signalMapper = new QSignalMapper(this);
+    QSignalMapper* saving_signalMapper = new QSignalMapper(this);
+    QSignalMapper* timeredit_signalMapper = new QSignalMapper(this);
 
-    video_0_spinbox = new QSpinBox();
-    video_0_spinbox->setValue(15);
-    QLabel* spin_label_0 = new QLabel(QString("  fps"));
-    QHBoxLayout* spin_layout_0 = new QHBoxLayout();
-    spin_layout_0->addWidget(video_0_spinbox);
-    spin_layout_0->addWidget(spin_label_0);
-    video_0_layout->addLayout(spin_layout_0);
+    int i=0;
+    int j=0;
 
-    video_0_enable = new QPushButton();
-    video_0_enable->setCheckable(true);
-    video_0_enable->setText("Enable");
-    video_0_layout->addWidget(video_0_enable);
+    while(glob_id<8)
+    {
+        if(j>3)
+	{
+	    i++;
+	    j=0;
+	}
+        QVBoxLayout* video_layout = new QVBoxLayout();
+	QHBoxLayout* control_layout = new QHBoxLayout();
+	QLabel* video_label = new QLabel("cam. "+QString::fromStdString(std::to_string(glob_id))+"period [s]:");
+	video_label->setFixedSize(60,30);
 
+	video_switch[glob_id] = new QPushButton("Start");
+	video_saving[glob_id] = new QPushButton("Saving");
+	video_timer_edit[glob_id] = new QLineEdit();
+	video_timer_edit.at(glob_id)->setFixedSize(60,30);
+	video_timer_edit.at(glob_id)->setText(QString::number(1.0, 'f', 2));
+	video_display[glob_id] = new QWidget();
+	video_timer[glob_id] = new QTimer();
 
+	video_layout->addWidget(video_display.at(glob_id));
+	control_layout->addWidget(video_switch.at(glob_id));
+	control_layout->addWidget(video_saving.at(glob_id));
+	control_layout->addWidget(video_label);
+	control_layout->addWidget(video_timer_edit.at(glob_id));
+	video_layout->addLayout(control_layout);
+	main_layout.addLayout(video_layout,i,j++,Qt::AlignCenter);
 
-    video_1_layout = new QVBoxLayout();
-    video_1_label = new QLabel(QString("Video 1"));
-    video_1_layout->addWidget(video_1_label);
+	connect(video_switch.at(glob_id), SIGNAL(clicked(bool)), switch_signalMapper, SLOT(map()));
+	switch_signalMapper->setMapping(video_switch.at(glob_id), glob_id);
+	connect(video_saving.at(glob_id), SIGNAL(clicked(bool)), saving_signalMapper, SLOT(map()));
+	saving_signalMapper->setMapping(video_saving.at(glob_id), glob_id);
+	connect(video_timer_edit.at(glob_id), SIGNAL(returnPressed()), timeredit_signalMapper, SLOT(map()));
+	timeredit_signalMapper->setMapping(video_timer_edit.at(glob_id), glob_id);
+	glob_id++;
+    }
 
-    QVBoxLayout* combo_layout_1 = new QVBoxLayout();
-    QLabel* combo_label_1 = new QLabel("Port:");
-    combo_layout_1->addWidget(combo_label_1);
-    video_1_combobox = new QComboBox();
-    video_1_combobox->addItem(QString("1234"));
-    video_1_combobox->addItem(QString("1235"));
-    video_1_combobox->addItem(QString("1236"));
-    video_1_combobox->setCurrentIndex(1);
-    combo_layout_1->addWidget(video_1_combobox);
-    video_1_layout->addLayout(combo_layout_1);
+    connect(switch_signalMapper, SIGNAL(mapped(int)), this, SLOT(on_video_switch_clicked(int)));
+    connect(saving_signalMapper, SIGNAL(mapped(int)), this, SLOT(on_video_saving_clicked(int)));
+    connect(timeredit_signalMapper, SIGNAL(mapped(int)), this, SLOT(on_video_timer_changed(int)));
+    
+    setCentralWidget(new QWidget);
+    centralWidget()->setLayout(&main_layout);
+}
 
-    video_1_spinbox = new QSpinBox();
-    video_1_spinbox->setValue(15);
-    QLabel* spin_label_1= new QLabel(QString("  fps"));
-    QHBoxLayout* spin_layout_1 = new QHBoxLayout();
-    spin_layout_1->addWidget(video_1_spinbox);
-    spin_layout_1->addWidget(spin_label_1);
-    video_1_layout->addLayout(spin_layout_1);
+WId MainWindow::getWinId(int index)
+{
+    return video_display.at(index)->winId();
+}
 
-    video_1_enable = new QPushButton();
-    video_1_enable->setText("Enable");
-    video_1_enable->setCheckable(true);
-    video_1_layout->addWidget(video_1_enable);
+void MainWindow::on_video_saving_clicked(const int& id)
+{
+    std::cout<<"save: To be implemented"<<std::endl;
+}
 
+void MainWindow::on_video_switch_clicked(const int& id)
+{
+    std::cout<<"switch: To be implemented "<<std::endl;
+}
 
+void MainWindow::on_video_timer_changed(const int& id)
+{
+    std::cout<<"timer edit: To be implemented"<<std::endl;
+}
 
-    video_2_layout = new QVBoxLayout();
-    video_2_label = new QLabel(QString("Video 2"));
-    video_2_layout->addWidget(video_2_label);
+void MainWindow::timers_body()
+{
+    std::cout<<"timer body: To be implemented"<<std::endl;
+}
 
-    QVBoxLayout* combo_layout_2 = new QVBoxLayout();
-    QLabel* combo_label_2 = new QLabel("Port:");
-    combo_layout_2->addWidget(combo_label_2);
-    video_2_combobox = new QComboBox();
-    video_2_combobox->addItem(QString("1234"));
-    video_2_combobox->addItem(QString("1235"));
-    video_2_combobox->addItem(QString("1236"));
-    video_2_combobox->setCurrentIndex(2);
-    combo_layout_2->addWidget(video_2_combobox);
-    video_2_layout->addLayout(combo_layout_2);
-
-    video_2_spinbox = new QSpinBox();
-    video_2_spinbox->setValue(15);
-    QLabel* spin_label_2 = new QLabel(QString("  fps"));
-    QHBoxLayout* spin_layout_2 = new QHBoxLayout();
-    spin_layout_2->addWidget(video_2_spinbox);
-    spin_layout_2->addWidget(spin_label_2);
-    video_2_layout->addLayout(spin_layout_2);
-
-    video_2_enable = new QPushButton();
-    video_2_enable->setText("Enable");
-    video_2_enable->setCheckable(true);
-    video_2_layout->addWidget(video_2_enable);
-
-
-
-    ui->controls_layout->addLayout(video_0_layout);
-    ui->controls_layout->addLayout(video_1_layout);
-    ui->controls_layout->addLayout(video_2_layout);
-
-    connect(video_0_enable,SIGNAL(clicked()),this,SLOT(on_video_0_enable_clicked()));
-    connect(video_1_enable,SIGNAL(clicked()),this,SLOT(on_video_1_enable_clicked()));
-    connect(video_2_enable,SIGNAL(clicked()),this,SLOT(on_video_2_enable_clicked()));
-
+void MainWindow::on_save_menu_clicked()
+{
+    std::cout<<"save menu: To be implemented"<<std::endl;
 }
 
 MainWindow::~MainWindow()
 {
-    delete ui;
-}
-
-
-
-WId MainWindow::getWinId(int index)
-{
-    if (index==0)
-        return ui->video0->winId();
-    if (index==1)
-        return ui->video1->winId();
-    if (index==2)
-        return ui->video2->winId();
 
 }
-
-void MainWindow::on_video_0_enable_clicked()
-{
-    if(video_0_enable->isChecked())
-    {
-        video_0_enable->setText("Disable");
-    }
-    else
-    {
-        video_0_enable->setText("Enable");
-    }
-}
-
-void MainWindow::on_video_1_enable_clicked()
-{
-    if(video_1_enable->isChecked())
-    {
-        video_1_enable->setText("Disable");
-    }
-    else
-    {
-        video_1_enable->setText("Enable");
-    }
-}
-
-void MainWindow::on_video_2_enable_clicked()
-{
-    if(video_2_enable->isChecked())
-    {
-        video_2_enable->setText("Disable");
-    }
-    else
-    {
-        video_2_enable->setText("Enable");
-    }
-}
-

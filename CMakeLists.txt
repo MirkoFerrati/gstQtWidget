@@ -54,9 +54,6 @@ include_directories(
 )
 add_subdirectory(GstSupport/)
 
-
-QT4_WRAP_UI(FORMS_HEADERS mainwindow.ui)
-
 qt4_wrap_cpp(MOC_FILES
   streaming_window.h mainwindow.h
 )
