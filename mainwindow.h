@@ -28,7 +28,7 @@ private Q_SLOTS:
     void on_video_switch_clicked(const int& id);
     void on_video_saving_clicked(const int& id);
     void on_video_timer_changed(const int& id);
-    void timers_body();
+    void timers_body(const int& id);
     void on_save_menu_clicked();
 
 private:
