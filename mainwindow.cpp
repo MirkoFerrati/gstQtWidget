@@ -49,7 +49,7 @@ MainWindow::MainWindow(yarp::os::Network* yarp, QWidget *parent) : QMainWindow(p
 	main_layout.addLayout(video_layout,i,j++,Qt::AlignCenter);
 
 	video_port[glob_id] = port++;
-	command_map[glob_id] = "camera_rec video"+std::to_string(glob_id)+" "+std::to_string(video_port.at(glob_id));
+	command_map[glob_id] = "./camera_rec video"+std::to_string(glob_id)+" "+std::to_string(video_port.at(glob_id));
 	system(command_map.at(glob_id).c_str());
 	command_port[glob_id]->open("/camera_rec/video"+std::to_string(glob_id));
 
