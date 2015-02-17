@@ -38,6 +38,7 @@ else()
 endif()
 
 find_package(Qt4 COMPONENTS QtCore QtGui REQUIRED)
+find_package(YARP)
 include(${QT_USE_FILE})
 find_library(GST NAMES gst PATHS /usr/lib/gstreamer-0.10/)
 
@@ -74,6 +75,7 @@ mainwindow.cpp
 
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} 
 ${QT_LIBRARIES} 
+${YARP_LIBRARIES}
 # GstSupport 
 gstinterfaces-0.10
 gstreamer-0.10 gobject-2.0 gmodule-2.0 gthread-2.0 xml2 pthread z m glib-2.0   gstinterfaces-0.10
