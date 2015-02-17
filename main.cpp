@@ -128,6 +128,11 @@ void save(GstElement* pipeline,std::string filename)
 
 int main(int argc, char *argv[])
 {
+    if (argc<2) 
+    {
+        std::cout<<"usage: webcam_rec video0  \n  missing video name parameter, such as video0, video1 and so on"<<std::endl;
+        exit(EXIT_FAILURE);
+    }
     // yarp network declaration and check
     yarp::os::Network yarp;
     if(!yarp.checkNetwork()){
@@ -136,10 +141,10 @@ int main(int argc, char *argv[])
     }
     // yarp network initialization
     yarp.init();
+
     gst_init(&argc, &argv);
     GstElement * pipeline;
-    //TODO: get from args the webcam to use!
-    std::string prefix="video0";
+    std::string prefix=argv[1];//"video0";
     yarp::os::BufferedPort<yarp::os::Bottle> port;
     port.open("/camera_rec/"+prefix);
     prefix.append("-");
@@ -150,7 +155,7 @@ int main(int argc, char *argv[])
     std::string temp=prefix;
     temp.append(buffer);
     temp.append(".mp4");
-    initSaveVideo(temp, &pipeline, "/dev/video0");
+    initSaveVideo(temp, &pipeline, "/dev/"+prefix);
     int counter=0;
     bool exit=false;
     gst_element_set_state(GST_ELEMENT(pipeline), GST_STATE_PLAYING);
