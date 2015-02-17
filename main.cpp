@@ -42,17 +42,27 @@ void addVideo(int port, WId id)
 
 }
 
+//To receive gst-launch udpsrc port=1234 ! jpegdec ! xvimagesink sync=false
 
-
-void initSaveVideo(std::string filename, GstElement ** result, std::string device)
+void initSaveVideo(std::string filename, GstElement ** result, std::string device, int port_number, std::string hostname="127.0.0.1")
 {
     std::string inPipelineDescription = "v4l2src device=";
     inPipelineDescription.append(device);
+    
     inPipelineDescription.append(" ! video/x-raw-yuv,framerate=30/1 ! \
     clockoverlay font-desc=\"Sans 12\" halign=left valign=top time-format=\"%Y/%m/%d %H:%M:%S\" ! \
-    x264enc pass=qual quantizer=20 tune=zerolatency name=\"enc\" ! matroskamux name=\"mux\" ! filesink location=");
+    tee name=\"splitter\" splitter. ! \
+    queue ! \
+    videorate ! video/x-raw-yuv, width=640, height=480, framerate=1/1 ! jpegenc \
+    ! udpsink host=127.0.0.1 port=");
+    inPipelineDescription.append(std::to_string(port_number));
+    inPipelineDescription.append(" rtpbin.send_rtcp_src_0 \
+    splitter. ! \
+    queue ! x264enc pass=qual quantizer=20 tune=zerolatency name=\"enc\" ! matroskamux name=\"mux\" ! filesink location=");
+
     inPipelineDescription.append(filename);
     inPipelineDescription.append(" name=\"save\"");
+    std::cout<<inPipelineDescription<<std::endl;
     GError * error(0);
     *result = gst_parse_launch(inPipelineDescription.c_str(), &error);
     if (error)
@@ -111,6 +121,7 @@ void save(GstElement* pipeline,std::string filename)
     char buffer [80];
     strftime (buffer,80,"%Y-%m-%d-%H-%M-%S",now);
     std::string temp=filename;
+    temp.append("-");
     temp.append(buffer);
     temp.append(".mp4");
     std::cout<<"saving file"<<temp<<std::endl;
@@ -118,8 +129,8 @@ void save(GstElement* pipeline,std::string filename)
     GstElement* filemux = gst_bin_get_by_name(GST_BIN(pipeline), "mux");
     GstElement* encoder = gst_bin_get_by_name(GST_BIN(pipeline), "enc");
     gst_element_set_state(GST_ELEMENT(encoder), GST_STATE_NULL);
-    gst_element_set_state(GST_ELEMENT(filesink), GST_STATE_NULL);
     gst_element_set_state(GST_ELEMENT(filemux), GST_STATE_NULL);
+    gst_element_set_state(GST_ELEMENT(filesink), GST_STATE_NULL);
     g_object_set (G_OBJECT (filesink), "location", temp.c_str(), NULL);
     gst_element_set_state(GST_ELEMENT(encoder), GST_STATE_PLAYING);
     gst_element_set_state(GST_ELEMENT(filemux), GST_STATE_PLAYING);
@@ -128,9 +139,9 @@ void save(GstElement* pipeline,std::string filename)
 
 int main(int argc, char *argv[])
 {
-    if (argc<2) 
+    if (argc<3) 
     {
-        std::cout<<"usage: webcam_rec video0  \n  missing video name parameter, such as video0, video1 and so on"<<std::endl;
+        std::cout<<"usage: webcam_rec video0 1234  \n  with video name parameter, such as video0, video1 and so on, and a udp port parameter, such as 1234"<<std::endl;
         exit(EXIT_FAILURE);
     }
     // yarp network declaration and check
@@ -145,17 +156,18 @@ int main(int argc, char *argv[])
     gst_init(&argc, &argv);
     GstElement * pipeline;
     std::string prefix=argv[1];//"video0";
+    int port_number = atoi(argv[2]);//1234
     yarp::os::BufferedPort<yarp::os::Bottle> port;
     port.open("/camera_rec/"+prefix);
-    prefix.append("-");
     time_t t = time(0);   // get time now
     struct tm * now = localtime( & t );
     char buffer [80];
     strftime (buffer,80,"%Y-%m-%d-%H-%M-%S",now);
     std::string temp=prefix;
+    temp.append("-"); 
     temp.append(buffer);
     temp.append(".mp4");
-    initSaveVideo(temp, &pipeline, "/dev/"+prefix);
+    initSaveVideo(temp, &pipeline, "/dev/"+prefix,port_number);
     int counter=0;
     bool exit=false;
     gst_element_set_state(GST_ELEMENT(pipeline), GST_STATE_PLAYING);
