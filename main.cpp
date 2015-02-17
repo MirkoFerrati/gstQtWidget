@@ -23,7 +23,7 @@ void initSaveVideo(std::string filename, GstElement ** result, std::string devic
     clockoverlay font-desc=\"Sans 12\" halign=left valign=top time-format=\"%Y/%m/%d %H:%M:%S\" ! \
     tee name=\"splitter\" splitter. ! \
     queue ! \
-    videorate ! video/x-raw-yuv, width=640, height=480, framerate=1/1 ! jpegenc \
+    videorate name=\"screenshot\" ! video/x-raw-yuv, width=640, height=480, framerate=1/1 ! jpegenc \
     ! udpsink host=127.0.0.1 port=");
     inPipelineDescription.append(std::to_string(port_number));
     inPipelineDescription.append(" rtpbin.send_rtcp_src_0 \
@@ -41,21 +41,6 @@ void initSaveVideo(std::string filename, GstElement ** result, std::string devic
         throw std::runtime_error(msg);
     }
     
-}
-
-std::string getCommand(yarp::os::BufferedPort<yarp::os::Bottle>& command_port)
-{
-//     //TODO: replace with some yarp stuff!
-//     std::string cmd="";
-//     std::cin>>cmd;
-//     return cmd;
-//     
-    yarp::os::Bottle* bot_command = command_port.read(false);
-    if(bot_command != NULL) {
-        std::string command_i= bot_command->get(0).asString();
-        return command_i;
-    }
-    return "";
 }
 
 //   This method is a wonderful hack in order to avoid losing frames, check this other solutions if you are curious
@@ -122,8 +107,31 @@ int main(int argc, char *argv[])
 
     while(!exit)
     {
-        std::string cmd=getCommand(port);
+        yarp::os::Bottle* bot_command = port.read(false);
+        std::string cmd;
+        if(bot_command != NULL) {
+            cmd= bot_command->get(0).asString();
+        }
+        
         if (cmd=="quit") exit=true;
+        if (cmd=="saving") 
+        {
+            gst_element_set_state(GST_ELEMENT(pipeline), GST_STATE_PLAYING);
+        }
+        if (cmd=="not saving")
+        {
+            save(pipeline,prefix);
+            counter=0;
+            gst_element_set_state(GST_ELEMENT(pipeline), GST_STATE_NULL);
+        }
+        if (false && cmd.find("period")!=std::string::npos)
+        {
+            GstElement* screenshot = gst_bin_get_by_name(GST_BIN(pipeline), "screenshot");
+            std::string frames=std::to_string(bot_command->get(1).asInt());
+            frames.append("/1");
+            std::cout<<"setting framerate of screenshots to "<<frames<<std::endl;
+            g_object_set (G_OBJECT (screenshot), "framerate", frames.c_str(), NULL);
+        }
         if (cmd=="save") 
         {
             if (counter>5)
