@@ -29,7 +29,7 @@ public:
 private Q_SLOTS:
     void on_video_switch_clicked(const int& id);
     void on_video_saving_clicked(const int& id);
-    void on_video_timer_changed(const int& id);
+    void on_video_fps_changed(const int& id);
     void on_save_menu_clicked();
 
 private:
@@ -39,7 +39,7 @@ private:
     std::map<int,QPushButton*> video_saving;
     std::map<int,QLineEdit*> video_timer_edit;
     std::map<int,QWidget*> video_display;
-    std::map<int,double> video_timer;
+    std::map<int,int> video_fps;
     std::map<int,std::string> command_map;
     std::map<int,int> video_port;
     std::map<int,yarp::os::Port*> command_port;

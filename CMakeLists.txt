@@ -26,16 +26,16 @@ endif(COMMAND cmake_policy)
 set (PROJECT_NAME gstreamer)
 project(${PROJECT_NAME})
 
-include(CheckCXXCompilerFlag)
-check_cxx_compiler_flag("-std=c++11" COMPILER_SUPPORTS_CXX11)
-check_cxx_compiler_flag("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
-if(COMPILER_SUPPORTS_CXX11)
+# include(CheckCXXCompilerFlag)
+# check_cxx_compiler_flag("-std=c++11" COMPILER_SUPPORTS_CXX11)
+# check_cxx_compiler_flag("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
+# if(COMPILER_SUPPORTS_CXX11)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g")
-elseif(COMPILER_SUPPORTS_CXX0X)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
-else()
-    message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
-endif()
+# elseif(COMPILER_SUPPORTS_CXX0X)
+#     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+# else()
+#     message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
+# endif()
 
 find_package(Qt4 COMPONENTS QtCore QtGui REQUIRED)
 find_package(YARP)
@@ -65,14 +65,16 @@ ADD_EXECUTABLE(camera_rec ${FORMS_HEADERS}
 main.cpp 
 )
 
-ADD_EXECUTABLE(camera_gui ${MOC_FILES} camera_gui.cpp)
+ADD_EXECUTABLE(camera_gui ${MOC_FILES} mainwindow.cpp camera_gui.cpp)
 
 TARGET_LINK_LIBRARIES(camera_rec
 ${QT_LIBRARIES} 
 ${YARP_LIBRARIES}
 gstinterfaces-0.10
-gstreamer-0.10 gobject-2.0 gmodule-2.0 gthread-2.0 xml2 pthread z m glib-2.0   gstinterfaces-0.10
+gstreamer-0.10 gobject-2.0 gmodule-2.0 gthread-2.0 xml2  z m glib-2.0 pthread
 )
 
-TARGET_LINK_LIBRARIES(camera_gui ${QT_LIBRARIES} ${YARP_LIBRARIES})
+TARGET_LINK_LIBRARIES(camera_gui ${QT_LIBRARIES} ${YARP_LIBRARIES}
+gstinterfaces-0.10
+gstreamer-0.10 gobject-2.0 gmodule-2.0 gthread-2.0 xml2  z m glib-2.0 pthread)
 
