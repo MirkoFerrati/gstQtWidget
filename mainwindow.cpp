@@ -26,7 +26,6 @@ MainWindow::MainWindow(yarp::os::Network* yarp, QWidget *parent) : QMainWindow(p
         QVBoxLayout* video_layout = new QVBoxLayout();
 	QHBoxLayout* control_layout = new QHBoxLayout();
 	QLabel* video_label = new QLabel("cam. "+QString::fromStdString(std::to_string(glob_id))+" [fps 1-30]:");
-	video_label->setFixedSize(60,30);
 
 	video_switch[glob_id] = new QPushButton("Running");
 	video_switch.at(glob_id)->setCheckable(true);
@@ -35,6 +34,7 @@ MainWindow::MainWindow(yarp::os::Network* yarp, QWidget *parent) : QMainWindow(p
 	video_saving.at(glob_id)->setCheckable(true);
 	video_saving.at(glob_id)->setChecked(true);
 	video_timer_edit[glob_id] = new QLineEdit();
+	video_timer_edit[glob_id]->setEnabled(false);
 	video_timer_edit.at(glob_id)->setFixedSize(60,30);
 	video_timer_edit.at(glob_id)->setText(QString::number(1));
 	video_display[glob_id] = new QWidget();
@@ -49,9 +49,11 @@ MainWindow::MainWindow(yarp::os::Network* yarp, QWidget *parent) : QMainWindow(p
 	main_layout.addLayout(video_layout,i,j++,Qt::AlignCenter);
 
 	video_port[glob_id] = port++;
-	command_map[glob_id] = "./camera_rec video"+std::to_string(glob_id)+" "+std::to_string(video_port.at(glob_id));
-	system(command_map.at(glob_id).c_str());
-	command_port[glob_id]->open("/camera_rec/video"+std::to_string(glob_id));
+	command_map[glob_id] = "./camera_rec video"+std::to_string(glob_id)+" "+std::to_string(video_port.at(glob_id))+" &";
+// 	system(command_map.at(glob_id).c_str());
+	command_port[glob_id] = new yarp::os::Port();
+	command_port.at(glob_id)->open("/camera_gui/video"+std::to_string(glob_id));
+	yarp::os::Network::connect("/camera_gui/video"+std::to_string(glob_id),"/camera_rec/video"+std::to_string(glob_id));
 
 	connect(video_switch.at(glob_id), SIGNAL(clicked(bool)), switch_signalMapper, SLOT(map()));
 	switch_signalMapper->setMapping(video_switch.at(glob_id), glob_id);
@@ -96,8 +98,6 @@ void MainWindow::on_video_saving_clicked(const int& id)
 	command.addString("nosaving");
 	command_port.at(id)->write(command);
     }
-
-    std::cout<<"save: To be implemented"<<std::endl;
 }
 
 void MainWindow::on_video_switch_clicked(const int& id)
@@ -110,10 +110,10 @@ void MainWindow::on_video_switch_clicked(const int& id)
     else
     {
         video_switch.at(id)->setText("Stopped");
-	system(("killall "+command_map.at(id)).c_str());
+	yarp::os::Bottle command;
+	command.addString("quit");
+	command_port.at(id)->write(command);
     }
-
-    std::cout<<"switch: To be implemented "<<std::endl;
 }
 
 void MainWindow::on_video_fps_changed(const int& id)
