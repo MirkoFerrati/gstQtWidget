@@ -1,12 +1,13 @@
 #include <QApplication>
 #include <gst/gst.h>
-#include "streaming_window.h"
+// #include "streaming_window.h"
 #include "mainwindow.h"
 extern "C"
 {
     #include <gst/interfaces/xoverlay.h>
 }
-
+#include <iostream>
+#include <unistd.h>
 
 
 void addVideo(int port, WId id)
@@ -27,17 +28,12 @@ void addVideo(int port, WId id)
     g_assert(depay);
     GstElement *h264 = gst_element_factory_make("ffdec_h264", "h264");
     g_assert(h264);
-
     GstElement *videoOut = gst_element_factory_make("xvimagesink", "video out");
     g_assert(videoOut);
-
+    
     gst_bin_add_many(GST_BIN(bin), testSrc,depay,h264, videoOut, NULL);
-    //gst_element_link_many(testSrc, videoOut, NULL);
-
     gst_element_link_many (testSrc, depay,h264,videoOut,NULL);
-
     gst_element_set_state(GST_ELEMENT(bin), GST_STATE_PLAYING);
-
     gst_x_overlay_set_xwindow_id(GST_X_OVERLAY(videoOut), id);
 
 
@@ -45,7 +41,30 @@ void addVideo(int port, WId id)
 
 
 
-int main(int argc, char *argv[])
+void saveVideo(std::string filename, GstElement ** result, std::string device)
+{
+    std::string inPipelineDescription = "v4l2src device=";
+    inPipelineDescription.append(device);
+    inPipelineDescription.append(" ! video/x-raw-yuv,framerate=30/1 ! \
+    clockoverlay font-desc=\"Sans 12\" halign=left valign=top time-format=\"%Y/%m/%d %H:%M:%S\" ! \
+    x264enc pass=qual quantizer=20 tune=zerolatency ! matroskamux name=\"mux\" ! filesink location=");
+    //timeoverlay halign=left valign=bottom text=\"Stream time:\" shaded-background=true ! \
+    //     video/x-raw-yuv,framerate=30/1 ! \
+//     theoraenc keyframe-force=30 bitrate=2560 ! oggmux !filesink location=";
+    inPipelineDescription.append(filename);
+    inPipelineDescription.append(" name=\"save\"");
+    GError * error(0);
+    *result = gst_parse_launch(inPipelineDescription.c_str(), &error);
+    if (error)
+    {
+        std::string msg = std::string("Parsing pipeline failed. Reason: ") + error->message;
+        throw std::runtime_error(msg);
+    }
+    
+}
+
+
+int main1(int argc, char *argv[])
 {
 
     //gst-launch udpsrc port=1236 ! "application/x-rtp, payload=127" ! rtph264depay ! ffdec_h264 ! xvimagesink sync=false
@@ -64,4 +83,55 @@ int main(int argc, char *argv[])
        // streaming_window window;
         window.show();
        return a.exec();
+}
+
+std::string getCommand()
+{
+    //TODO: replace with some yarp stuff!
+    std::string cmd="";
+    std::cin>>cmd;
+    return cmd;
+}
+
+int main(int argc, char *argv[])
+{
+    gst_init(&argc, &argv);
+    GstElement * pipeline;
+    //TODO: get from args the webcam to use!
+    //TODO: change filename in the pipeline with the current time-date!
+    saveVideo("test.mp4", &pipeline, "/dev/video0");
+    int counter=0;
+    bool exit=false;
+    gst_element_set_state(GST_ELEMENT(pipeline), GST_STATE_PLAYING);
+
+    while(!exit)
+    {
+        std::string cmd=getCommand();
+        if (cmd=="quit") exit=true;
+        if (cmd=="save") 
+        {
+            GstElement* filesink = gst_bin_get_by_name(GST_BIN(pipeline), "save");
+            GstElement* filemux = gst_bin_get_by_name(GST_BIN(pipeline), "mux");
+            //TODO: change filename in the pipeline with the current time-date!
+            gst_element_set_state(GST_ELEMENT(filesink), GST_STATE_NULL);
+            gst_element_set_state(GST_ELEMENT(filemux), GST_STATE_NULL);
+            g_object_set (G_OBJECT (filesink), "location", "test1.mp4", NULL);
+            //TODO this fucking queues will lose headers, 
+//             check here https://github.com/groakat/chunkyH264 
+//             https://github.com/pedrocr/camerasink
+//             https://github.com/pedrocr/camerasink/blob/edbe35e11a935fd0ab2c4eab82372c2d03790501/bin/testsave.c
+//             gst_element_set_state(GST_ELEMENT(pipeline), GST_STATE_PLAYING);
+            
+            gst_element_set_state(GST_ELEMENT(filemux), GST_STATE_PLAYING);
+            gst_element_set_state(GST_ELEMENT(filesink), GST_STATE_PLAYING);
+        }
+        counter++;
+        if (counter==20)
+        {
+            counter=0;
+        }
+        sleep(1);
+    }
+    gst_element_set_state(GST_ELEMENT(pipeline), GST_STATE_NULL);
+    return  0;
 }

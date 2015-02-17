@@ -52,24 +52,30 @@ include_directories(
    /usr/include/libxml2
     ${PROJECT_SOURCE_DIR}/include
 )
-add_subdirectory(GstSupport/)
+# add_subdirectory(GstSupport/)
 
 qt4_wrap_cpp(MOC_FILES
-  streaming_window.h mainwindow.h
+#   streaming_window.h 
+  mainwindow.h
 )
 # add include directories
 INCLUDE_DIRECTORIES(
-GstSupport/include
+# GstSupport/include
 build/
 )
 
-link_directories( GstSupport/build/ )
+# link_directories( GstSupport/build/ )
 
 ADD_EXECUTABLE(${PROJECT_NAME} ${MOC_FILES} ${FORMS_HEADERS}
-main.cpp streaming_window.cpp mainwindow.cpp
+main.cpp 
+# streaming_window.cpp 
+mainwindow.cpp
 )
 
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} 
-${QT_LIBRARIES} GstSupport gstinterfaces-0.10
+${QT_LIBRARIES} 
+# GstSupport 
+gstinterfaces-0.10
+gstreamer-0.10 gobject-2.0 gmodule-2.0 gthread-2.0 xml2 pthread z m glib-2.0   gstinterfaces-0.10
 )
 
