@@ -23,7 +23,7 @@ if(COMMAND cmake_policy)
     cmake_policy(SET CMP0005 NEW)
     cmake_policy(SET CMP0017 NEW)
 endif(COMMAND cmake_policy)
-set (PROJECT_NAME gstreamer-gui)
+set (PROJECT_NAME gstreamer)
 project(${PROJECT_NAME})
 
 include(CheckCXXCompilerFlag)
@@ -44,8 +44,6 @@ find_library(GST NAMES gst PATHS /usr/lib/gstreamer-0.10/)
 
 include_directories(
 /usr/include/gstreamer-0.10
-#    /opt/local/include
-#    /opt/local/include/gstreamer-0.10
     /usr/include/glib-2.0
     /usr/include/gstreamer-0.10/gst
     /usr/lib/x86_64-linux-gnu/glib-2.0/include/
@@ -53,31 +51,28 @@ include_directories(
    /usr/include/libxml2
     ${PROJECT_SOURCE_DIR}/include
 )
-# add_subdirectory(GstSupport/)
 
 qt4_wrap_cpp(MOC_FILES
-#   streaming_window.h 
   mainwindow.h
 )
+
 # add include directories
 INCLUDE_DIRECTORIES(
-# GstSupport/include
 build/
 )
 
-# link_directories( GstSupport/build/ )
-
-ADD_EXECUTABLE(${PROJECT_NAME} ${MOC_FILES} ${FORMS_HEADERS}
+ADD_EXECUTABLE(camera_rec ${FORMS_HEADERS}
 main.cpp 
-# streaming_window.cpp 
-mainwindow.cpp
 )
 
-TARGET_LINK_LIBRARIES(${PROJECT_NAME} 
+ADD_EXECUTABLE(camera_gui ${MOC_FILES} camera_gui.cpp)
+
+TARGET_LINK_LIBRARIES(camera_rec
 ${QT_LIBRARIES} 
 ${YARP_LIBRARIES}
-# GstSupport 
 gstinterfaces-0.10
 gstreamer-0.10 gobject-2.0 gmodule-2.0 gthread-2.0 xml2 pthread z m glib-2.0   gstinterfaces-0.10
 )
+
+TARGET_LINK_LIBRARIES(camera_gui ${QT_LIBRARIES} ${YARP_LIBRARIES})
 
