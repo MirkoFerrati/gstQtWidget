@@ -13,22 +13,23 @@
 #include <QMenu>
 #include <QSignalMapper>
 #include <iostream>
+#include <yarp/os/all.h>
 
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = 0);
+    MainWindow(yarp::os::Network* yarp, QWidget *parent = 0);
     ~MainWindow();
 
-    WId getWinId(int index=0);
+    WId getWinId(int index);
+    int getPort(int index);
 
 private Q_SLOTS:
     void on_video_switch_clicked(const int& id);
     void on_video_saving_clicked(const int& id);
     void on_video_timer_changed(const int& id);
-    void timers_body(const int& id);
     void on_save_menu_clicked();
 
 private:
@@ -38,7 +39,10 @@ private:
     std::map<int,QPushButton*> video_saving;
     std::map<int,QLineEdit*> video_timer_edit;
     std::map<int,QWidget*> video_display;
-    std::map<int,QTimer*> video_timer;
+    std::map<int,double> video_timer;
+    std::map<int,std::string> command_map;
+    std::map<int,int> video_port;
+    std::map<int,yarp::os::Port*> command_port;
     
     QMenuBar menu_bar;
     QMenu* file_menu;
