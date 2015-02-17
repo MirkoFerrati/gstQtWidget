@@ -14,6 +14,7 @@
 #include <QSignalMapper>
 #include <iostream>
 #include <yarp/os/all.h>
+#include "gstqtwidget.h"
 
 class MainWindow : public QMainWindow
 {
@@ -38,7 +39,7 @@ private:
     std::map<int,QPushButton*> video_switch;
     std::map<int,QPushButton*> video_saving;
     std::map<int,QLineEdit*> video_timer_edit;
-    std::map<int,QWidget*> video_display;
+    std::map<int,gstqtwidget*> video_display;
     std::map<int,int> video_fps;
     std::map<int,std::string> command_map;
     std::map<int,int> video_port;

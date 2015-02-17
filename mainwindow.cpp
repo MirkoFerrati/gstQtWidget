@@ -3,6 +3,7 @@
 
 MainWindow::MainWindow(yarp::os::Network* yarp, QWidget *parent) : QMainWindow(parent), save_action(tr("&Save"),parent)
 {
+    main_layout.setContentsMargins(0,0,0,0);
     file_menu = menuBar()->addMenu(tr("&File"));
     file_menu->addAction(&save_action);
 
@@ -27,6 +28,8 @@ MainWindow::MainWindow(yarp::os::Network* yarp, QWidget *parent) : QMainWindow(p
 	QHBoxLayout* control_layout = new QHBoxLayout();
 	QLabel* video_label = new QLabel("cam. "+QString::fromStdString(std::to_string(glob_id))+" [fps 1-30]:");
 
+	video_port[glob_id] = port;
+
 	video_switch[glob_id] = new QPushButton("Running");
 	video_switch.at(glob_id)->setCheckable(true);
 	video_switch.at(glob_id)->setChecked(true);
@@ -37,7 +40,8 @@ MainWindow::MainWindow(yarp::os::Network* yarp, QWidget *parent) : QMainWindow(p
 	video_timer_edit[glob_id]->setEnabled(false);
 	video_timer_edit.at(glob_id)->setFixedSize(60,30);
 	video_timer_edit.at(glob_id)->setText(QString::number(1));
-	video_display[glob_id] = new QWidget();
+	video_display[glob_id] = new gstqtwidget(this);
+	video_display.at(glob_id)->setPipeline(video_port[glob_id]);
 	video_fps[glob_id] = video_timer_edit.at(glob_id)->text().toInt();
 
 	video_layout->addWidget(video_display.at(glob_id));
@@ -48,7 +52,6 @@ MainWindow::MainWindow(yarp::os::Network* yarp, QWidget *parent) : QMainWindow(p
 	video_layout->addLayout(control_layout);
 	main_layout.addLayout(video_layout,i,j++,Qt::AlignCenter);
 
-	video_port[glob_id] = port++;
 	command_map[glob_id] = "./camera_rec video"+std::to_string(glob_id)+" "+std::to_string(video_port.at(glob_id))+" &";
 // 	system(command_map.at(glob_id).c_str());
 	command_port[glob_id] = new yarp::os::Port();
@@ -62,6 +65,7 @@ MainWindow::MainWindow(yarp::os::Network* yarp, QWidget *parent) : QMainWindow(p
 	connect(video_timer_edit.at(glob_id), SIGNAL(returnPressed()), timeredit_signalMapper, SLOT(map()));
 	timeredit_signalMapper->setMapping(video_timer_edit.at(glob_id), glob_id);
 	glob_id++;
+	port++;
     }
 
     connect(switch_signalMapper, SIGNAL(mapped(int)), this, SLOT(on_video_switch_clicked(int)));

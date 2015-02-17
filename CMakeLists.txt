@@ -63,6 +63,7 @@ include_directories(
 qt4_wrap_cpp(MOC_FILES
   mainwindow.h
   gstqtwidget.h
+  gstqtMedia.h
 )
 
 # add include directories
@@ -74,7 +75,7 @@ ADD_EXECUTABLE(camera_rec ${FORMS_HEADERS}
 main.cpp 
 )
 
-ADD_EXECUTABLE(camera_gui ${MOC_FILES} mainwindow.cpp camera_gui.cpp gstqtwidget.cpp)
+ADD_EXECUTABLE(camera_gui ${MOC_FILES} mainwindow.cpp camera_gui.cpp gstqtwidget.cpp gstqtMedia.cpp)
 
 TARGET_LINK_LIBRARIES(camera_rec
 ${QT_LIBRARIES} 
