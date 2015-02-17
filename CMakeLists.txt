@@ -41,7 +41,15 @@ find_package(Qt4 COMPONENTS QtCore QtGui REQUIRED)
 find_package(YARP)
 include(${QT_USE_FILE})
 find_library(GST NAMES gst PATHS /usr/lib/gstreamer-0.10/)
+if (NOT BUILDING_QTGSTREAMER)
+    set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/modules)
+        find_package(QtGStreamer REQUIRED)
+    set(CMAKE_INCLUDE_CURRENT_DIR ON)
+endif()
 
+include_directories(${QTGSTREAMER_INCLUDES})
+add_definitions(${QTGSTREAMER_DEFINITIONS})
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${QTGSTREAMER_FLAGS}")
 include_directories(
 /usr/include/gstreamer-0.10
     /usr/include/glib-2.0
@@ -54,6 +62,7 @@ include_directories(
 
 qt4_wrap_cpp(MOC_FILES
   mainwindow.h
+  gstqtwidget.h
 )
 
 # add include directories
@@ -65,7 +74,7 @@ ADD_EXECUTABLE(camera_rec ${FORMS_HEADERS}
 main.cpp 
 )
 
-ADD_EXECUTABLE(camera_gui ${MOC_FILES} mainwindow.cpp camera_gui.cpp)
+ADD_EXECUTABLE(camera_gui ${MOC_FILES} mainwindow.cpp camera_gui.cpp gstqtwidget.cpp)
 
 TARGET_LINK_LIBRARIES(camera_rec
 ${QT_LIBRARIES} 
@@ -74,7 +83,7 @@ gstinterfaces-0.10
 gstreamer-0.10 gobject-2.0 gmodule-2.0 gthread-2.0 xml2  z m glib-2.0 pthread
 )
 
-TARGET_LINK_LIBRARIES(camera_gui ${QT_LIBRARIES} ${YARP_LIBRARIES}
+TARGET_LINK_LIBRARIES(camera_gui ${QT_LIBRARIES} ${YARP_LIBRARIES}  ${QTGSTREAMER_UI_LIBRARIES}
 gstinterfaces-0.10
 gstreamer-0.10 gobject-2.0 gmodule-2.0 gthread-2.0 xml2  z m glib-2.0 pthread)
 
