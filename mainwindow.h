@@ -34,7 +34,8 @@ private Q_SLOTS:
     void on_save_menu_clicked();
 
 private:
-    QGridLayout main_layout;
+    QHBoxLayout out_layout;
+    QVBoxLayout main_layout1, main_layout2;
 
     std::map<int,QPushButton*> video_switch;
     std::map<int,QPushButton*> video_saving;

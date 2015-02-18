@@ -3,7 +3,6 @@
 
 MainWindow::MainWindow(yarp::os::Network* yarp, QWidget *parent) : QMainWindow(parent), save_action(tr("&Save"),parent)
 {
-    main_layout.setContentsMargins(0,0,0,0);
     file_menu = menuBar()->addMenu(tr("&File"));
     file_menu->addAction(&save_action);
 
@@ -13,17 +12,11 @@ MainWindow::MainWindow(yarp::os::Network* yarp, QWidget *parent) : QMainWindow(p
     QSignalMapper* saving_signalMapper = new QSignalMapper(this);
     QSignalMapper* timeredit_signalMapper = new QSignalMapper(this);
 
-    int i=0;
     int j=0;
     int port=1234;
 
     while(glob_id<8)
     {
-        if(j>3)
-	{
-	    i++;
-	    j=0;
-	}
         QVBoxLayout* video_layout = new QVBoxLayout();
 	QHBoxLayout* control_layout = new QHBoxLayout();
 	QLabel* video_label = new QLabel("cam. "+QString::fromStdString(std::to_string(glob_id))+" [fps 1-30]:");
@@ -50,7 +43,10 @@ MainWindow::MainWindow(yarp::os::Network* yarp, QWidget *parent) : QMainWindow(p
 	control_layout->addWidget(video_label);
 	control_layout->addWidget(video_timer_edit.at(glob_id));
 	video_layout->addLayout(control_layout);
-	main_layout.addLayout(video_layout,i,j++,Qt::AlignCenter);
+
+	if(j<4)main_layout1.addLayout(video_layout);
+	else main_layout2.addLayout(video_layout);
+	j++;
 
 	command_map[glob_id] = "./camera_rec video"+std::to_string(glob_id)+" "+std::to_string(video_port.at(glob_id))+" &";
 // 	system(command_map.at(glob_id).c_str());
@@ -67,13 +63,16 @@ MainWindow::MainWindow(yarp::os::Network* yarp, QWidget *parent) : QMainWindow(p
 	glob_id++;
 	port++;
     }
+    
+    out_layout.addLayout(&main_layout1);
+    out_layout.addLayout(&main_layout2);
 
     connect(switch_signalMapper, SIGNAL(mapped(int)), this, SLOT(on_video_switch_clicked(int)));
     connect(saving_signalMapper, SIGNAL(mapped(int)), this, SLOT(on_video_saving_clicked(int)));
     connect(timeredit_signalMapper, SIGNAL(mapped(int)), this, SLOT(on_video_fps_changed(int)));
     
     setCentralWidget(new QWidget);
-    centralWidget()->setLayout(&main_layout);
+    centralWidget()->setLayout(&out_layout);
 }
 
 WId MainWindow::getWinId(int index)
