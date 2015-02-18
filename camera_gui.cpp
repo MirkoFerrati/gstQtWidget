@@ -1,6 +1,5 @@
 #include <QApplication>
 #include <gst/gst.h>
-#include "mainwindow.h"
 #include "gstqtMedia.h"
 #include <iostream>
 #include <unistd.h>
@@ -24,7 +23,6 @@ int main(int argc, char *argv[])
     QGst::init(&argc, &argv);
 
     gstqtMedia window;
-//     MainWindow window(&yarp);
 
     window.show();
     return a.exec();
