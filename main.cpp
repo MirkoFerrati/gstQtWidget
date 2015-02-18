@@ -13,25 +13,33 @@ extern "C"
 #include <yarp/os/BufferedPort.h>
 #include <yarp/os/Network.h>
 
+
+
+
+
+//Launch from shell:
+// gst-launch v4l2src device=/dev/video2 ! image/jpeg,height=480,width=640 ! jpegdec ! ffmpegcolorspace ! clockoverlay font-desc=\"Sans 12\" halign=left valign=top time-format=\"%Y/%m/%d %H:%M:%S\" ! \
+tee name=\"splitter\" splitter. ! queue ! videorate name=\"screenshot\" ! video/x-raw-yuv, width=640, height=480, framerate=1/1 ! jpegenc \
+! udpsink host=127.0.0.1 port=1234 rtpbin.send_rtcp_src_0 splitter. ! queue ! x264enc pass=qual quantizer=20 tune=zerolatency ! matroskamux ! filesink location=video1
+
 //To receive gst-launch udpsrc port=1234 ! jpegdec ! xvimagesink sync=false
 void initSaveVideo(std::string filename, GstElement ** result, std::string device, int port_number, std::string hostname="127.0.0.1")
 {
     std::string inPipelineDescription = "v4l2src device=";
     inPipelineDescription.append(device);
-    
-    inPipelineDescription.append(" ! video/x-raw-yuv,framerate=30/1 ! \
+    inPipelineDescription.append(" ! image/jpeg,width=640,height=480 ! \
+    jpegdec ! ffmpegcolorspace ! \
     clockoverlay font-desc=\"Sans 12\" halign=left valign=top time-format=\"%Y/%m/%d %H:%M:%S\" ! \
     tee name=\"splitter\" splitter. ! \
     queue ! \
-    videorate name=\"screenshot\" ! video/x-raw-yuv, width=640, height=480, framerate=1/1 ! jpegenc \
-    ! udpsink host=127.0.0.1 port=");
+    videorate ! video/x-raw-yuv, width=640, height=480, framerate=1/1 ! jpegenc ! udpsink host=127.0.0.1 port=");
     inPipelineDescription.append(std::to_string(port_number));
-    inPipelineDescription.append(" rtpbin.send_rtcp_src_0 \
-    splitter. ! \
-    queue ! x264enc pass=qual quantizer=20 tune=zerolatency name=\"enc\" ! matroskamux name=\"mux\" ! filesink location=");
-
+    inPipelineDescription.append(" rtpbin.send_rtcp_src_0 ");
+    inPipelineDescription.append("splitter. ! queue ! x264enc pass=qual quantizer=20 tune=zerolatency name=\"enc\" ! matroskamux name=\"mux\" ! \
+    filesink location=");
     inPipelineDescription.append(filename);
-    inPipelineDescription.append(" name=\"save\"");
+    inPipelineDescription.append(" name=\"save\" ");
+    
     std::cout<<inPipelineDescription<<std::endl;
     GError * error(0);
     *result = gst_parse_launch(inPipelineDescription.c_str(), &error);
@@ -141,7 +149,7 @@ int main(int argc, char *argv[])
             }
         }
         counter++;
-        if (counter==20)
+        if (counter==300)
         {
             save(pipeline,prefix);
             counter=0;
