@@ -12,11 +12,11 @@ gstqtMedia::gstqtMedia(QWidget *parent)
    : QWidget(parent)
 {
    //create the player
-  video_display[1234]=new gstqtwidget(this);
-  video_display[1235]=new gstqtwidget(this);
-   video_display[1234]->setPipeline(1234);
-   video_display[1235]->setPipeline(1235);
-
+  for (int i=1230;i<1236;i++)
+  {
+    video_display[i]=new gstqtwidget(this);
+    video_display[i]->setPipeline(i);
+  }
    //create the UI
    QVBoxLayout *appLayout = new QVBoxLayout;
    appLayout->setContentsMargins(0, 0, 0, 0);
@@ -42,11 +42,23 @@ void gstqtMedia::onStateChanged()
 
 void gstqtMedia::createUI(QBoxLayout *appLayout)
 {
+    QHBoxLayout* mainvideo = new QHBoxLayout();
+  
     QHBoxLayout* control_layout = new QHBoxLayout();
         QVBoxLayout* video_layout = new QVBoxLayout();
-  video_layout->addWidget(  video_display[1234]);
-  video_layout->addWidget(video_display[1235]);
-  int glob_id=1234;
+	QVBoxLayout* video_layout1 = new QVBoxLayout();
+	
+	   //create the player
+  for (int i=1230;i<1233;i++)
+  {
+    video_layout->addWidget(  video_display[i]);
+  }
+  for (int i=1233;i<1236;i++)
+  {
+    video_layout1->addWidget(  video_display[i]);
+  }
+
+  int glob_id=1230;
 
   QLabel* video_label = new QLabel("cam. "+QString::fromStdString(std::to_string(glob_id))+" [fps 1-30]:");
 	video_switch[glob_id] = new QPushButton("Running");
@@ -63,7 +75,10 @@ void gstqtMedia::createUI(QBoxLayout *appLayout)
   control_layout->addWidget(video_saving.at(glob_id));
   control_layout->addWidget(video_label);
   control_layout->addWidget(video_timer_edit.at(glob_id));
-  video_layout->addLayout(control_layout);
-  	appLayout->addLayout(video_layout);
+  mainvideo->addLayout(video_layout);
+    mainvideo->addLayout(video_layout1);
+  	appLayout->addLayout(mainvideo);
+	  appLayout->addLayout(control_layout);
+
 
 }

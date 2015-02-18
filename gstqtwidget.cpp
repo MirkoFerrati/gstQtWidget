@@ -46,11 +46,12 @@ void gstqtwidget::setPipeline(int port)
         return;
     }
     src->setProperty("port",port);
-    
+    sink->setProperty("sync",false);
     m_pipeline = QGst::Pipeline::create();
     m_pipeline->add(src, dec, color, sink);
     //link elements
     src->link(dec);
+//     dec->link(sink);
     dec->link(color);
     color->link(sink);
     setVideoSink(sink);

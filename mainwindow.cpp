@@ -13,7 +13,7 @@ MainWindow::MainWindow(yarp::os::Network* yarp, QWidget *parent) : QMainWindow(p
     QSignalMapper* timeredit_signalMapper = new QSignalMapper(this);
 
     int j=0;
-    int port=1234;
+    int port=1230;
 
     while(glob_id<8)
     {
