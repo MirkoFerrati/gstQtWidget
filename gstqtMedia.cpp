@@ -66,9 +66,9 @@ void gstqtMedia::createUI(QBoxLayout *appLayout)
         
         video_port[glob_id] = port;
         
-        video_switch[glob_id] = new QPushButton("Running");
+        video_switch[glob_id] = new QPushButton("Stopped");
         video_switch.at(glob_id)->setCheckable(true);
-        video_switch.at(glob_id)->setChecked(true);
+        video_switch.at(glob_id)->setChecked(false);
         video_saving[glob_id] = new QPushButton("Saving");
         video_saving.at(glob_id)->setCheckable(true);
         video_saving.at(glob_id)->setChecked(true);
@@ -96,7 +96,10 @@ void gstqtMedia::createUI(QBoxLayout *appLayout)
         //      system(command_map.at(glob_id).c_str());
         command_port[glob_id] = new yarp::os::Port();
         command_port.at(glob_id)->open("/camera_gui/video"+std::to_string(glob_id));
-        yarp::os::Network::connect("/camera_gui/video"+std::to_string(glob_id),"/camera_rec/video"+std::to_string(glob_id));
+
+	yarp::os::ContactStyle style;
+	style.persistent = true;
+        yarp::os::Network::connect("/camera_rec/video"+std::to_string(glob_id),"/camera_gui/video"+std::to_string(glob_id), style);
         
         connect(video_switch.at(glob_id), SIGNAL(clicked(bool)), switch_signalMapper, SLOT(map()));
         switch_signalMapper->setMapping(video_switch.at(glob_id), glob_id);
@@ -114,10 +117,15 @@ void gstqtMedia::createUI(QBoxLayout *appLayout)
     appLayout->addLayout(mainvideo);
     
     QPushButton* save_button = new QPushButton("Save");
-
-    appLayout->addWidget(save_button);
+    QPushButton* quit_all_button = new QPushButton("Quit All");
+    QHBoxLayout* but_layout = new QHBoxLayout();
+    but_layout->addWidget(save_button);
+    but_layout->addWidget(quit_all_button);
+    
+    appLayout->addLayout(but_layout);
     
     connect(save_button, SIGNAL(clicked(bool)), this, SLOT(on_save_menu_clicked()));
+    connect(quit_all_button, SIGNAL(clicked(bool)), this, SLOT(on_quit_all_button_clicked()));
     connect(switch_signalMapper, SIGNAL(mapped(int)), this, SLOT(on_video_switch_clicked(int)));
     connect(saving_signalMapper, SIGNAL(mapped(int)), this, SLOT(on_video_saving_clicked(int)));
     connect(timeredit_signalMapper, SIGNAL(mapped(int)), this, SLOT(on_video_fps_changed(int)));
@@ -173,5 +181,12 @@ void gstqtMedia::on_save_menu_clicked()
 {
     yarp::os::Bottle command;
     command.addString("save");
+    for(auto item:command_port) item.second->write(command);
+}
+
+void gstqtMedia::on_quit_all_button_clicked()
+{
+    yarp::os::Bottle command;
+    command.addString("quit");
     for(auto item:command_port) item.second->write(command);
 }

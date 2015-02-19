@@ -28,6 +28,7 @@ private Q_SLOTS:
     void on_video_saving_clicked(const int& id);
     void on_video_fps_changed(const int& id);
     void on_save_menu_clicked();
+    void on_quit_all_button_clicked();
    void onStateChanged();
 
 protected:
