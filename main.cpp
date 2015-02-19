@@ -22,12 +22,13 @@ extern "C"
 tee name=\"splitter\" splitter. ! queue ! videorate name=\"screenshot\" ! video/x-raw-yuv, width=640, height=480, framerate=1/1 ! jpegenc \
 ! udpsink host=127.0.0.1 port=1234 rtpbin.send_rtcp_src_0 splitter. ! queue ! x264enc pass=qual quantizer=20 tune=zerolatency ! matroskamux ! filesink location=video1
 
-//To receive gst-launch udpsrc port=1234 ! jpegdec ! xvimagesink sync=false
+//To receive 
+// gst-launch udpsrc port=1234 ! jpegdec ! xvimagesink sync=false
 void initSaveVideo(std::string filename, GstElement ** result, std::string device, int port_number, std::string hostname="127.0.0.1")
 {
     std::string inPipelineDescription = "v4l2src device=";
     inPipelineDescription.append(device);
-    inPipelineDescription.append(" ! image/jpeg,width=640,height=480 ! \
+    inPipelineDescription.append(" ! image/jpeg,width=640,height=480,framerate=15/1 ! \
     jpegdec ! ffmpegcolorspace ! \
     clockoverlay font-desc=\"Sans 12\" halign=left valign=top time-format=\"%Y/%m/%d %H:%M:%S\" ! \
     tee name=\"splitter\" splitter. ! \
@@ -61,21 +62,26 @@ void save(GstElement* pipeline,std::string filename)
     struct tm * now = localtime( & t );
     char buffer [80];
     strftime (buffer,80,"%Y-%m-%d-%H-%M-%S",now);
-    std::string temp=filename;
-    temp.append("-");
+    std::string temp;
     temp.append(buffer);
+    temp.append("-"); 
+    temp.append(filename);
     temp.append(".mp4");
     std::cout<<"saving file"<<temp<<std::endl;
     GstElement* filesink = gst_bin_get_by_name(GST_BIN(pipeline), "save");
     GstElement* filemux = gst_bin_get_by_name(GST_BIN(pipeline), "mux");
     GstElement* encoder = gst_bin_get_by_name(GST_BIN(pipeline), "enc");
-    gst_element_set_state(GST_ELEMENT(encoder), GST_STATE_NULL);
-    gst_element_set_state(GST_ELEMENT(filemux), GST_STATE_NULL);
-    gst_element_set_state(GST_ELEMENT(filesink), GST_STATE_NULL);
+    gst_element_set_state(GST_ELEMENT(pipeline), GST_STATE_NULL);
+
+//     gst_element_set_state(GST_ELEMENT(encoder), GST_STATE_NULL);
+//     gst_element_set_state(GST_ELEMENT(filemux), GST_STATE_NULL);
+//     gst_element_set_state(GST_ELEMENT(filesink), GST_STATE_NULL);
     g_object_set (G_OBJECT (filesink), "location", temp.c_str(), NULL);
-    gst_element_set_state(GST_ELEMENT(encoder), GST_STATE_PLAYING);
-    gst_element_set_state(GST_ELEMENT(filemux), GST_STATE_PLAYING);
-    gst_element_set_state(GST_ELEMENT(filesink), GST_STATE_PLAYING);
+//     gst_element_set_state(GST_ELEMENT(encoder), GST_STATE_PLAYING);
+//     gst_element_set_state(GST_ELEMENT(filemux), GST_STATE_PLAYING);
+//     gst_element_set_state(GST_ELEMENT(filesink), GST_STATE_PLAYING);
+      gst_element_set_state(GST_ELEMENT(pipeline), GST_STATE_PLAYING);
+
 }
 
 int main(int argc, char *argv[])
@@ -104,9 +110,10 @@ int main(int argc, char *argv[])
     struct tm * now = localtime( & t );
     char buffer [80];
     strftime (buffer,80,"%Y-%m-%d-%H-%M-%S",now);
-    std::string temp=prefix;
-    temp.append("-"); 
+    std::string temp;
     temp.append(buffer);
+    temp.append("-"); 
+    temp.append(prefix);
     temp.append(".mp4");
     initSaveVideo(temp, &pipeline, "/dev/"+prefix,port_number);
     int counter=0;
@@ -149,7 +156,7 @@ int main(int argc, char *argv[])
             }
         }
         counter++;
-        if (counter==300)
+        if (counter==120)
         {
             save(pipeline,prefix);
             counter=0;
