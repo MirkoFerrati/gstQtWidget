@@ -8,13 +8,22 @@ In order to install all the dependencies and build the GstSupport library run:
 ./get_build_deps.sh
 ```
 
-Run
-========
-In order to run the GstQtWidget open the testgst.pro using QTCreator: build and run it.
-
-
-Example Usage
+Make
 =========
+
+Both a CmakeLists and Qt.pro files are provided, currently Cmake is the preferred way (and the only updated one)
+
+Run
+=========
+Start yarpserver first!
+
+usage: ./webcam_rec video0 1234  
+  with video name parameter, such as video0, video1 and so on, and a udp port parameter, such as 1234
+
+The gui can be started with ./camera_gui
+
+Example Usage of gst-launch from shell, just to make some tests
+==========
 
 - Send the video streaming from /dev/video2 to the host 10.255.32.212 at the port 1235 :
 
